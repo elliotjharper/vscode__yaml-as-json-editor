@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getNonce } from './util';
+import { getNonce } from './get-nonce';
 import { buildWebviewHtml } from './yaml-and-json.webview.html';
 
 /**
@@ -20,9 +20,7 @@ import { buildWebviewHtml } from './yaml-and-json.webview.html';
  * - Loading scripts and styles in a custom editor.
  * - Synchronizing changes between a text document and a custom editor.
  */
-export class YamlAndJsonEditorHost
-    implements vscode.CustomTextEditorProvider
-{
+export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
     public static register(
         context: vscode.ExtensionContext
     ): vscode.Disposable {

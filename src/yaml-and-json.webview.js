@@ -7,7 +7,7 @@
     let jsonMonacoEditor;
     let yamlMonacoEditor;
 
-    function updateState(jsonText, yamlText) {
+    function persistExtensionsState(jsonText, yamlText) {
         vscode.setState({
             jsonText,
             yamlText,
@@ -40,42 +40,108 @@
         }
     }
 
-    window.yamlAndJsonEditorsReady = (value) => {
-        jsonMonacoEditor = value.jsonMonacoEditor;
-        yamlMonacoEditor = value.yamlMonacoEditor;
+    function onMonacoLoaded() {
+        console.log(
+            "page cp2 - Monaco library loaded, creating editor instances"
+        );
+
+        // JSON EDITOR
+        //============
+        var jsonEditorElement = document.getElementById("json__editor");
+        // IStandaloneEditorConstructionOptions
+        var jsonEditorOptions = {
+            value: "",
+            language: "json",
+        };
+        jsonMonacoEditor = monaco.editor.create(
+            jsonEditorElement,
+            jsonEditorOptions
+        );
+
+        jsonMonacoEditor.onDidChangeModelContent((changeModelEvent) => {
+            if (changeModelEvent.isFlush) {
+                // Since this threw away what was in the editor this was performed by our extension not the user.
+                // As such, just ignore this change as we did it.
+                return;
+            }
+
+            console.log("User made a change in the editor!");
+            window.postMessage({ type: "user-typed-json" });
+        });
+
+        // jsonMonacoEditor.onDidChangeCursorPosition((e) => {
+        // 	console.log('cursorPositionChange');
+        // });
+
+        // jsonMonacoEditor.onDidChangeCursorSelection((e) => {
+        // 	console.log('selectionChange');
+        // });
+
+        // YAML EDITOR
+        //============
+        var yamlEditorElement = document.getElementById("yaml__editor");
+        // IStandaloneEditorConstructionOptions
+        var yamlEditorOptions = {
+            value: "",
+            language: "yaml",
+            readOnly: true,
+        };
+        yamlMonacoEditor = monaco.editor.create(
+            yamlEditorElement,
+            yamlEditorOptions
+        );
+
         updateEditorsContent();
-    };
+    }
 
-    // Handle messages sent from the extension to the webview
-    window.addEventListener("message", (event) => {
-        const message = event.data; // The json data that the extension sent
-        switch (message.type) {
-            case "init":
-                console.log(`vscode host -> webview js: init`);
+    /**
+     * When an instance of the editor is created 'init' is used to send the data in
+     */
+    function processInitFromEditorHost(message) {
+        const yamlFileText = message.text;
 
-                const yamlFileText = message.text;
+        persistExtensionsState(convertYamlToJson(yamlFileText), yamlFileText);
+        updateEditorsContent();
+    }
 
-                updateState(convertYamlToJson(yamlFileText), yamlFileText);
-                updateEditorsContent();
+    function processUpdateFromEditorHost(message) {
+        updateEditorsContent();
+    }
 
-                return;
+    function setupMessageListener() {
+        // Handle messages sent from the extension to the webview
+        window.addEventListener("message", (event) => {
+            const message = event.data; // The json data that the extension sent
 
-            case "update":
-                console.log(`vscode host -> webview js: update`);
+            console.log(`vscode host -> webview js: ${message.type}`);
 
-                //vscode.setState({ text: message.text });
-                updateEditorsContent();
+            switch (message.type) {
+                case "init":
+                    processInitFromEditorHost(message);
+                    return;
 
-                return;
+                case "update":
+                    processUpdateFromEditorHost(message);
+                    return;
 
-            case "webview__user-typed-json":
-                console.log("webview <script> -> webview js: user-typed-json");
-                vscode.postMessage({
-                    type: "webview-js__convert-json-to-yaml__request",
-                    value: "Test",
-                });
+                case "webview__user-typed-json":
+                    console.log(
+                        "webview <script> -> webview js: user-typed-json"
+                    );
+                    vscode.postMessage({
+                        type: "webview-js__convert-json-to-yaml__request",
+                        value: "Test",
+                    });
 
-                return;
-        }
-    });
+                    return;
+            }
+        });
+    }
+
+    function setupOnMonacoLoaded() {
+        window.yamlAndJsonOnMonacoLoaded = onMonacoLoaded;
+    }
+
+    setupMessageListener();
+    setupOnMonacoLoaded();
 })();

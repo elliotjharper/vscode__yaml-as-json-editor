@@ -37,49 +37,9 @@ export function buildWebviewHtml(
 		<script nonce="${nonce}">
 			require.config({ paths: { vs: '${monacoVsFolderUri}' } });
 			require(['vs/editor/editor.main'], function () {
-				console.log('page cp2 - Monaco library loaded, creating editor instances');
-
-				// JSON EDITOR
-				//============
-				var jsonEditorElement = document.getElementById('json__editor');						
-				var jsonMonacoEditor = monaco.editor.create(jsonEditorElement, {
-					value: '',
-					language: 'json'
-				});
-
-				jsonMonacoEditor.onDidChangeModelContent((changeModelEvent) => {
-					if(changeModelEvent.isFlush) {
-						// Since this threw away what was in the editor this was performed by our extension not the user.
-						// As such, just ignore this change as we did it.
-						return;
-					}
-
-					console.log('User made a change in the editor!');
-					window.postMessage({ type: 'user-typed-json' });
-				});
-
-				// jsonMonacoEditor.onDidChangeCursorPosition((e) => {
-				// 	console.log('cursorPositionChange');
-				// });
-
-				// jsonMonacoEditor.onDidChangeCursorSelection((e) => {
-				// 	console.log('selectionChange');
-				// });
-				
-				// YAML EDITOR
-				//============
-				var yamlEditorElement = document.getElementById('yaml__editor');
-				var yamlMonacoEditor = monaco.editor.create(yamlEditorElement, {
-					value: '',
-					language: 'yaml'
-				});
-				
-				window.yamlAndJsonEditorsReady({
-					jsonMonacoEditor,
-					yamlMonacoEditor
-				});
+				window.yamlAndJsonOnMonacoLoaded();
 			});
-			console.log('page cp1 - Monaco library load/require() started');
+			console.log('[webview inline script][cp1] Monaco library load/require() started');
 		</script>
 		<script nonce="${nonce}" src="${scriptUri}"></script>
 	</body>
