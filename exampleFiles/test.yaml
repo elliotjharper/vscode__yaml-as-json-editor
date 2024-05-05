@@ -1,0 +1,28 @@
+bookstore:
+  name: "Fantastic Books!"
+  location: "123 Main Street, Cityville, USA"
+  books:
+    - title: "The Great Gatsby"
+      author: "F. Scott Fitzgerald"
+      year: 1925
+      genre: "Fiction"
+      price: 12.99
+      stock: 50
+    - title: "To Kill a Mockingbird"
+      author: "Harper Lee"
+      year: 1960
+      genre: "Fiction"
+      price: 10.99
+      stock: 30
+    - title: "1984"
+      author: "George Orwell"
+      year: 1949
+      genre: "Science Fiction"
+      price: 9.99
+      stock: 25
+    - title: "The Catcher in the Rye"
+      author: "J.D. Salinger"
+      year: 1951
+      genre: "Fiction"
+      price: 11.99
+      stock: 40
