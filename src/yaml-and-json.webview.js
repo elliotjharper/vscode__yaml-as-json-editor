@@ -14,6 +14,18 @@
         });
     }
 
+    function debounce(func, delay) {
+        let timeoutId;
+        return function () {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(() => {
+                func.apply(this, arguments);
+            }, delay);
+        };
+    }
+
     function convertYamlToJson(yamlText) {
         return yamlText;
     }
@@ -108,6 +120,18 @@
         updateEditorsContent();
     }
 
+    function reflowEditors() {
+        jsonMonacoEditor?.layout();
+        yamlMonacoEditor?.layout();
+    }
+
+    function setupResizeListener() {
+        const debouncedReflowEditors = debounce(reflowEditors, 200);
+        window.onresize = () => {
+            debouncedReflowEditors();
+        };
+    }
+
     function setupMessageListener() {
         // Handle messages sent from the extension to the webview
         window.addEventListener("message", (event) => {
@@ -143,5 +167,6 @@
     }
 
     setupMessageListener();
+    setupResizeListener();
     setupOnMonacoLoaded();
 })();
