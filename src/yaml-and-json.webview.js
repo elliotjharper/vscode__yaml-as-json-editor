@@ -14,6 +14,24 @@
         });
     }
 
+    function updateStateJson(jsonText) {
+        const state = vscode.getState();
+
+        vscode.setState({
+            jsonText,
+            yamlText: state.yamlText,
+        });
+    }
+
+    function updateStateYaml(yamlText) {
+        const state = vscode.getState();
+
+        vscode.setState({
+            jsonText: state.jsonText,
+            yamlText,
+        });
+    }
+
     function debounce(func, delay) {
         let timeoutId;
         return function () {
@@ -78,6 +96,7 @@
             }
 
             console.log("User made a change in the editor!");
+            //TODO: UPDATE THE CONTENT IN THE JSON EDITOR!!!
             window.postMessage({ type: "user-typed-json" });
         });
 
@@ -107,16 +126,22 @@
     }
 
     /**
-     * When an instance of the editor is created 'init' is used to send the data in
+     * Invoked when an instance of the editor is created 'init' is used to send the data in
      */
     function processInitFromEditorHost(message) {
-        const yamlFileText = message.text;
-
-        persistExtensionsState(convertYamlToJson(yamlFileText), yamlFileText);
+        persistExtensionsState(message.jsonText, message.yamlText);
         updateEditorsContent();
     }
 
+    /**
+     * Invoked when an instance of the edtor is refocused after being hidden
+     */
     function processUpdateFromEditorHost(message) {
+        updateEditorsContent();
+    }
+
+    function processJsonFromEditorHost(message) {
+        updateStateJson(message.jsonText);
         updateEditorsContent();
     }
 
@@ -156,7 +181,10 @@
                         type: "webview-js__convert-json-to-yaml__request",
                         value: "Test",
                     });
+                    return;
 
+                case "response__convert-yaml-to-json":
+                    processJsonFromEditorHost(message);
                     return;
             }
         });
@@ -169,4 +197,19 @@
     setupMessageListener();
     setupResizeListener();
     setupOnMonacoLoaded();
+
+    function setupTestButton() {
+        const testButtonElement = document.getElementById("test-btn-1");
+        testButtonElement?.addEventListener("click", () => {
+            console.log("testButtonClicked");
+
+            const state = vscode.getState();
+
+            vscode.postMessage({
+                type: "convert-yaml-to-json",
+                yamlText: state.yamlText,
+            });
+        });
+    }
+    setupTestButton();
 })();

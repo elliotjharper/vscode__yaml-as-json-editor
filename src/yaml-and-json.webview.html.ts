@@ -19,6 +19,10 @@ export function buildWebviewHtml(
 		<title>Yaml And Json</title>
 	</head>
 	<body>
+		<div class="debug-row">
+			<button id="test-btn-1">Roundtrip Convert</button>
+		</div>
+	
 		<div class="languages__row">
 			<div class="language__column">
 				<div class="language__header">JSON</div>

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getNonce } from './get-nonce';
 import { buildWebviewHtml } from './yaml-and-json.webview.html';
+import * as yaml from 'yaml';
 
 /**
  * Plan for a yaml editor
@@ -62,6 +63,7 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
 
         const changeDocumentSubscription =
             vscode.workspace.onDidChangeTextDocument((e) => {
+                // This is invoked when an unfocused instance of our editor is refocused
                 if (e.document.uri.toString() === document.uri.toString()) {
                     webviewPanel.webview.postMessage({
                         type: 'update',
@@ -76,8 +78,10 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         });
 
         // Receive messages from the webview.
-        webviewPanel.webview.onDidReceiveMessage((e) => {
-            switch (e.type) {
+        webviewPanel.webview.onDidReceiveMessage((message) => {
+            console.log(`[editorHost] messageReceived, type = ${message.type}`);
+
+            switch (message.type) {
                 case 'add':
                     console.log('TEST RECEIVED MESSAGE!');
                     //this.addNewScratch(document);
@@ -91,15 +95,20 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
                     console.log('TEST RECEIVED MESSAGE!');
                     return;
 
-                case 'asdasdsa':
-                    console.log('TEST RECEIVED MESSAGE!');
+                case 'convert-yaml-to-json':
+                    this.handleRequestToConvertYamlToJson(
+                        message.yamlText,
+                        webviewPanel
+                    );
                     return;
             }
         });
 
+        const initialYamlText = document.getText();
         webviewPanel.webview.postMessage({
             type: 'init',
-            text: document.getText(),
+            jsonText: this.convertYamlToJson(initialYamlText),
+            yamlText: initialYamlText,
         });
     }
 
@@ -138,5 +147,41 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         const nonce = getNonce();
 
         return buildWebviewHtml(styleUri, nonce, monacoVsFolderUri, scriptUri);
+    }
+
+    private convertYamlToJson(yamlText: string): string {
+        const parsedYaml = yaml.parse(yamlText);
+        const numberOfIndentSpaces = 4;
+        const prettyJson = JSON.stringify(
+            parsedYaml,
+            null,
+            numberOfIndentSpaces
+        );
+        return prettyJson;
+    }
+
+    private convertJsonToYaml(jsonText: string): string {
+        const parsedJson = JSON.parse(jsonText);
+        const yamlString = yaml.stringify(parsedJson, {
+            defaultKeyType: 'PLAIN',
+            defaultStringType: 'QUOTE_DOUBLE',
+        });
+        return yamlString;
+    }
+
+    private handleRequestToConvertYamlToJson(
+        yamlText: string,
+        webviewPanel: vscode.WebviewPanel
+    ): void {
+        //const jsonText = this.convertYamlToJson(yamlText);
+
+        const jsonText = this.convertJsonToYaml(
+            this.convertYamlToJson(yamlText)
+        );
+
+        webviewPanel.webview.postMessage({
+            type: 'response__convert-yaml-to-json',
+            jsonText,
+        });
     }
 }
