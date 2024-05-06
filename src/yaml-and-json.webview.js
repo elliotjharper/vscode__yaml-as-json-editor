@@ -224,5 +224,5 @@
             });
         });
     }
-    setupTestButton();
+    //setupTestButton();
 })();

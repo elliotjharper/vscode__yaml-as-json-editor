@@ -19,9 +19,9 @@ export function buildWebviewHtml(
 		<title>Yaml And Json</title>
 	</head>
 	<body>
-		<div class="debug-row">
+		<!--<div class="debug-row">
 			<button id="test-btn-1">Roundtrip Convert</button>
-		</div>
+		</div>-->
 	
 		<div class="languages__row">
 			<div class="language__column">
@@ -32,8 +32,8 @@ export function buildWebviewHtml(
 			<div class="language__column">
 				<div class="language__header">
 					<span>Yaml</span>
-					<label><input type="radio" name="yaml-view" value="current">Current</label>
-					<label><input type="radio" name="yaml-view" value="original">Original</label>
+					<!--<label><input type="radio" name="yaml-view" value="current">Current</label>
+					<label><input type="radio" name="yaml-view" value="original">Original</label>-->
 				</div>
 				<div class="language__editor" id="yaml__editor"></div>
 			</div>

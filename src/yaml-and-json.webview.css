@@ -11,9 +11,9 @@
     flex-direction: row;
     gap: 16px;
     
-    /* height: 100vh; */
+    height: 100vh;
     /* stand-in value to be used whilst the debug row is shown */
-    height: calc(100vh - 30px);
+    /*height: calc(100vh - 30px);*/
 }
 
 .language__column {
