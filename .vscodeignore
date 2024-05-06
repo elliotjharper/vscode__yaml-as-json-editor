@@ -1,6 +1,9 @@
 *
 */**
 !dist/*
+!node_modules/monaco-editor/min/vs
+!src/yaml-and-json.webview.css
+!src/yaml-and-json.webview.js
 !demo.png
 !LICENSE.txt
 !package.json

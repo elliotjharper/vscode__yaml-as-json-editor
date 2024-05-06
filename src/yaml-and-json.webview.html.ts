@@ -31,7 +31,7 @@ export function buildWebviewHtml(
 
 			<div class="language__column">
 				<div class="language__header">
-					<span>Yaml</span>
+					<span>YAML</span>
 					<!--<label><input type="radio" name="yaml-view" value="current">Current</label>
 					<label><input type="radio" name="yaml-view" value="original">Original</label>-->
 				</div>
