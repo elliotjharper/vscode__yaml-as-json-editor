@@ -4,12 +4,12 @@
     "description": "Lets you open YAML files like they are JSON and edit it as JSON. Then save out as YAML.",
     "publisher": "elltg",
     "author": "elltg",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode__yaml-as-json-editor"
     },
-    "main": "./out/extension.js",
+    "main": "./dist/extension.js",
     "license": "ISC",
     "scripts": {
         "vscode:prepublish": "npm run esbuild-base -- --minify",

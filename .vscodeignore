@@ -1,0 +1,7 @@
+*
+*/**
+!dist/*
+!demo.png
+!LICENSE.txt
+!package.json
+!README.md
