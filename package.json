@@ -1,9 +1,15 @@
 {
-    "name": "yaml-as-json-editor",
+    "name": "elltg-yaml-as-json-editor",
+    "displayName": "YAML as JSON Editor",
+    "description": "Lets you open YAML files like they are JSON and edit it as JSON. Then save out as YAML.",
+    "publisher": "elltg",
+    "author": "elltg",
     "version": "1.0.0",
-    "description": "",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/elliotjharper/vscode__yaml-as-json-editor"
+    },
     "main": "./out/extension.js",
-    "author": "",
     "license": "ISC",
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -11,15 +17,17 @@
         "lint": "eslint \"src/**/*.ts\"",
         "watch": "tsc -w -p ./"
     },
+    "dependencies": {
+        "monaco-editor": "^0.47.0",
+        "yaml": "^2.4.2"
+    },
     "devDependencies": {
         "@types/node": "^16.18.34",
         "@types/vscode": "^1.73.0",
         "@typescript-eslint/eslint-plugin": "^6.7.0",
         "@typescript-eslint/parser": "^6.7.0",
         "eslint": "^8.26.0",
-        "monaco-editor": "^0.47.0",
-        "typescript": "^5.4.2",
-        "yaml": "^2.4.2"
+        "typescript": "^5.4.2"
     },
     "engines": {
         "vscode": "^1.74.0"
@@ -28,7 +36,7 @@
         "customEditors": [
             {
                 "viewType": "eh.yamlAndJson",
-                "displayName": "Yaml and Json cross editor",
+                "displayName": "YAML as JSON Editor",
                 "selector": [
                     {
                         "filenamePattern": "*.yaml"
