@@ -6,6 +6,7 @@
 
     let jsonMonacoEditor;
     let yamlMonacoEditor;
+    let editorsHaveInitialContent = false;
 
     function persistExtensionsState(jsonText, yamlText) {
         vscode.setState({
@@ -14,7 +15,7 @@
         });
     }
 
-    function updateStateJson(jsonText) {
+    function updateStateJson(jsonText, updateEditor = true) {
         const state = vscode.getState();
 
         vscode.setState({
@@ -22,7 +23,9 @@
             yamlText: state.yamlText,
         });
 
-        jsonMonacoEditor?.setValue?.(jsonText);
+        if (updateEditor) {
+            jsonMonacoEditor?.setValue?.(jsonText);
+        }
     }
 
     function updateStateYaml(yamlText) {
@@ -59,6 +62,8 @@
             console.log("cp uec 2 - update editors invoked, editors ready");
             jsonMonacoEditor.setValue(state.jsonText);
             yamlMonacoEditor.setValue(state.yamlText);
+
+            editorsHaveInitialContent = true;
         } else {
             console.log(
                 "cp uec 1 - update editors invoked, editors not ready!"
@@ -132,6 +137,11 @@
      * Invoked when an instance of the edtor is refocused after being hidden
      */
     function processUpdateFromEditorHost(message) {
+        if (editorsHaveInitialContent) {
+            // Only want this to happen once.
+            // This is how we are ignoring TextDocument edits that we started after user input
+            return;
+        }
         updateEditorsFromState();
     }
 
@@ -146,11 +156,12 @@
     function processJsonFromUser() {
         console.log("User made a change in the editor!");
         const jsonText = jsonMonacoEditor.getValue();
+        updateStateJson(jsonText, false);
         vscode.postMessage({
             type: "convert-json-to-yaml",
             jsonText,
+            writeOut: true,
         });
-        //updateStateYaml(jsonValue);
     }
 
     function reflowEditors() {

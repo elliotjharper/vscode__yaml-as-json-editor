@@ -41,7 +41,7 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
      * Called when our custom editor is opened.
      */
     public async resolveCustomTextEditor(
-        document: vscode.TextDocument,
+        textDocument: vscode.TextDocument,
         webviewPanel: vscode.WebviewPanel,
         _token: vscode.CancellationToken
     ): Promise<void> {
@@ -63,11 +63,13 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
 
         const changeDocumentSubscription =
             vscode.workspace.onDidChangeTextDocument((e) => {
-                // This is invoked when an unfocused instance of our editor is refocused
-                if (e.document.uri.toString() === document.uri.toString()) {
+                // This is invoked:
+                // --when an unfocused instance of our editor is refocused (needed here to get the freshly re rendered re populate the editors with what was in the state)
+                // --or when we make an edit to the TextDocument (here we don't want to make the editors change as the change from from the user)
+                if (e.document.uri.toString() === textDocument.uri.toString()) {
                     webviewPanel.webview.postMessage({
                         type: 'update',
-                        text: document.getText(),
+                        text: textDocument.getText(),
                     });
                 }
             });
@@ -92,13 +94,15 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
                 case 'convert-json-to-yaml':
                     this.handleRequestToConvertJsonToYaml(
                         message.jsonText,
-                        webviewPanel
+                        webviewPanel,
+                        textDocument,
+                        message.writeOut
                     );
                     return;
             }
         });
 
-        const initialYamlText = document.getText();
+        const initialYamlText = textDocument.getText();
         webviewPanel.webview.postMessage({
             type: 'init',
             jsonText: this.convertYamlToJson(initialYamlText),
@@ -171,10 +175,6 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
     ): void {
         const jsonText = this.convertYamlToJson(yamlText);
 
-        // const jsonText = this.convertJsonToYaml(
-        //     this.convertYamlToJson(yamlText)
-        // );
-
         webviewPanel.webview.postMessage({
             type: 'response__convert-yaml-to-json',
             jsonText,
@@ -183,7 +183,9 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
 
     private handleRequestToConvertJsonToYaml(
         jsonText: string,
-        webviewPanel: vscode.WebviewPanel
+        webviewPanel: vscode.WebviewPanel,
+        document: vscode.TextDocument,
+        writeOut: boolean
     ): void {
         const yamlText = this.convertJsonToYaml(jsonText);
 
@@ -191,5 +193,29 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
             type: 'response__convert-json-to-yaml',
             yamlText,
         });
+
+        if (writeOut) {
+            this.updateTextDocument(document, yamlText);
+        }
+    }
+
+    /**
+     * Write out the json to a given document.
+     */
+    private updateTextDocument(
+        document: vscode.TextDocument,
+        newValue: string
+    ) {
+        const edit = new vscode.WorkspaceEdit();
+
+        // Just replace the entire document every time for this example extension.
+        // A more complete extension should compute minimal edits instead.
+        edit.replace(
+            document.uri,
+            new vscode.Range(0, 0, document.lineCount, 0),
+            newValue
+        );
+
+        return vscode.workspace.applyEdit(edit, { isRefactoring: true });
     }
 }
