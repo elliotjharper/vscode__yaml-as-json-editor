@@ -155,6 +155,8 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
     }
 
     private convertJsonToYaml(jsonText: string): string {
+        // todo: if parsing fails,
+        // inform the webview so that it reflects that the editor state is not currently valid
         const parsedJson = JSON.parse(jsonText);
         const yamlString = yaml.stringify(parsedJson, {
             defaultKeyType: 'PLAIN',
