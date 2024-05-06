@@ -12,10 +12,13 @@
     "main": "./out/extension.js",
     "license": "ISC",
     "scripts": {
-        "vscode:prepublish": "npm run compile",
+        "vscode:prepublish": "npm run esbuild-base -- --minify",
         "compile": "tsc -p ./",
-        "lint": "eslint \"src/**/*.ts\"",
-        "watch": "tsc -w -p ./"
+        "watch": "tsc -w -p ./",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+        "lint": "eslint \"src/**/*.ts\""
     },
     "dependencies": {
         "monaco-editor": "^0.47.0",
@@ -26,6 +29,7 @@
         "@types/vscode": "^1.73.0",
         "@typescript-eslint/eslint-plugin": "^6.7.0",
         "@typescript-eslint/parser": "^6.7.0",
+        "esbuild": "^0.20.2",
         "eslint": "^8.26.0",
         "typescript": "^5.4.2"
     },
