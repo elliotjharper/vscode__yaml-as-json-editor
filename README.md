@@ -11,7 +11,12 @@ YAML cryptically advertises itself as "superset of JSON".
 This just means that you can convert any JSON to YAML, but there are a few 'extras' supported in YAML that cannot be converted to JSON.
 So if you try to open a YAML file that cannot be converted to JSON then this cannot be used.
 
-## Running the example
+## TODO list
+
+-   Error feedback when you currently have JSON that cannot be parsed and therefore is not currently going to be used.
+-   Error feedback when you open a YAML file that could not be translated to JSON.
+
+## Debugging the edtior
 
 -   Open this example in VS Code 1.46+
 -   `npm install`
