@@ -21,6 +21,8 @@
             jsonText,
             yamlText: state.yamlText,
         });
+
+        jsonMonacoEditor?.setValue?.(jsonText);
     }
 
     function updateStateYaml(yamlText) {
@@ -30,6 +32,8 @@
             jsonText: state.jsonText,
             yamlText,
         });
+
+        yamlMonacoEditor?.setValue?.(yamlText);
     }
 
     function debounce(func, delay) {
@@ -44,15 +48,7 @@
         };
     }
 
-    function convertYamlToJson(yamlText) {
-        return yamlText;
-    }
-
-    function convertJsonToYaml(jsonText) {
-        return jsonText;
-    }
-
-    function updateEditorsContent() {
+    function updateEditorsFromState() {
         const state = vscode.getState();
         if (!state?.jsonText || !state?.yamlText) {
             console.log("cp uec 3 - update editors invoked, no state!");
@@ -88,6 +84,7 @@
             jsonEditorOptions
         );
 
+        const debouncedProcessJsonFromUser = debounce(processJsonFromUser, 200);
         jsonMonacoEditor.onDidChangeModelContent((changeModelEvent) => {
             if (changeModelEvent.isFlush) {
                 // Since this threw away what was in the editor this was performed by our extension not the user.
@@ -95,9 +92,7 @@
                 return;
             }
 
-            console.log("User made a change in the editor!");
-            //TODO: UPDATE THE CONTENT IN THE JSON EDITOR!!!
-            window.postMessage({ type: "user-typed-json" });
+            debouncedProcessJsonFromUser();
         });
 
         // jsonMonacoEditor.onDidChangeCursorPosition((e) => {
@@ -122,7 +117,7 @@
             yamlEditorOptions
         );
 
-        updateEditorsContent();
+        updateEditorsFromState();
     }
 
     /**
@@ -130,19 +125,32 @@
      */
     function processInitFromEditorHost(message) {
         persistExtensionsState(message.jsonText, message.yamlText);
-        updateEditorsContent();
+        updateEditorsFromState();
     }
 
     /**
      * Invoked when an instance of the edtor is refocused after being hidden
      */
     function processUpdateFromEditorHost(message) {
-        updateEditorsContent();
+        updateEditorsFromState();
     }
 
     function processJsonFromEditorHost(message) {
         updateStateJson(message.jsonText);
-        updateEditorsContent();
+    }
+
+    function processYamlFromEditorHost(message) {
+        updateStateYaml(message.yamlText);
+    }
+
+    function processJsonFromUser() {
+        console.log("User made a change in the editor!");
+        const jsonText = jsonMonacoEditor.getValue();
+        vscode.postMessage({
+            type: "convert-json-to-yaml",
+            jsonText,
+        });
+        //updateStateYaml(jsonValue);
     }
 
     function reflowEditors() {
@@ -173,18 +181,12 @@
                     processUpdateFromEditorHost(message);
                     return;
 
-                case "webview__user-typed-json":
-                    console.log(
-                        "webview <script> -> webview js: user-typed-json"
-                    );
-                    vscode.postMessage({
-                        type: "webview-js__convert-json-to-yaml__request",
-                        value: "Test",
-                    });
-                    return;
-
                 case "response__convert-yaml-to-json":
                     processJsonFromEditorHost(message);
+                    return;
+
+                case "response__convert-json-to-yaml":
+                    processYamlFromEditorHost(message);
                     return;
             }
         });

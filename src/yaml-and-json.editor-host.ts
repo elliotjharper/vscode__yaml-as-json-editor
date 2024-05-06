@@ -82,22 +82,16 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
             console.log(`[editorHost] messageReceived, type = ${message.type}`);
 
             switch (message.type) {
-                case 'add':
-                    console.log('TEST RECEIVED MESSAGE!');
-                    //this.addNewScratch(document);
-                    return;
-
-                case 'delete':
-                    //this.deleteScratch(document, e.id);
-                    return;
-
-                case 'init':
-                    console.log('TEST RECEIVED MESSAGE!');
-                    return;
-
                 case 'convert-yaml-to-json':
                     this.handleRequestToConvertYamlToJson(
                         message.yamlText,
+                        webviewPanel
+                    );
+                    return;
+
+                case 'convert-json-to-yaml':
+                    this.handleRequestToConvertJsonToYaml(
+                        message.jsonText,
                         webviewPanel
                     );
                     return;
@@ -173,15 +167,27 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         yamlText: string,
         webviewPanel: vscode.WebviewPanel
     ): void {
-        //const jsonText = this.convertYamlToJson(yamlText);
+        const jsonText = this.convertYamlToJson(yamlText);
 
-        const jsonText = this.convertJsonToYaml(
-            this.convertYamlToJson(yamlText)
-        );
+        // const jsonText = this.convertJsonToYaml(
+        //     this.convertYamlToJson(yamlText)
+        // );
 
         webviewPanel.webview.postMessage({
             type: 'response__convert-yaml-to-json',
             jsonText,
+        });
+    }
+
+    private handleRequestToConvertJsonToYaml(
+        jsonText: string,
+        webviewPanel: vscode.WebviewPanel
+    ): void {
+        const yamlText = this.convertJsonToYaml(jsonText);
+
+        webviewPanel.webview.postMessage({
+            type: 'response__convert-json-to-yaml',
+            yamlText,
         });
     }
 }

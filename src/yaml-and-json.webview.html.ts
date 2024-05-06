@@ -27,13 +27,15 @@ export function buildWebviewHtml(
 			<div class="language__column">
 				<div class="language__header">JSON</div>
 				<div class="language__editor" id="json__editor"></div>
-				<div class="language__footer">JSON</div>
 			</div>
 
 			<div class="language__column">
-				<div class="language__header">Yaml</div>
+				<div class="language__header">
+					<span>Yaml</span>
+					<label><input type="radio" name="yaml-view" value="current">Current</label>
+					<label><input type="radio" name="yaml-view" value="original">Original</label>
+				</div>
 				<div class="language__editor" id="yaml__editor"></div>
-				<div class="language__footer">Yaml</div>
 			</div>
 		</div>
 		
