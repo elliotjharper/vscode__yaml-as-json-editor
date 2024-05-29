@@ -13,8 +13,13 @@ So if you try to open a YAML file that cannot be converted to JSON then this can
 
 ## TODO list
 
--   Error feedback when you currently have JSON that cannot be parsed and therefore is not currently going to be used.
 -   Error feedback when you open a YAML file that could not be translated to JSON.
+
+## DONE list
+
+-   Theme the inner editors with a similar color kind to the hosting vscode instances current theme.
+-   Error feedback when you currently have JSON that cannot be parsed and therefore is not currently going to be used.
+-   Column resizing.
 
 ## Debugging the edtior
 
