@@ -30,11 +30,12 @@ export function buildWebviewHtml(
 				<div class="language__editor" id="json__editor"></div>
 			</div>
 
-			<div class="language__column">
+			<div class="language__column" id="yaml-column">
 				<div class="language__header">
 					<span>YAML</span>
 					<!--<label><input type="radio" name="yaml-view" value="current">Current</label>
 					<label><input type="radio" name="yaml-view" value="original">Original</label>-->
+					<span id="yaml-validity-element"></span>
 				</div>
 				<div class="language__editor" id="yaml__editor"></div>
 			</div>

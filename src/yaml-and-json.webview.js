@@ -19,8 +19,8 @@
         const state = vscode.getState();
 
         vscode.setState({
+            ...state,
             jsonText,
-            yamlText: state.yamlText,
         });
 
         if (updateEditor) {
@@ -32,11 +32,24 @@
         const state = vscode.getState();
 
         vscode.setState({
-            jsonText: state.jsonText,
+            ...state,
             yamlText,
+            yamlInvalid: false,
         });
 
         yamlMonacoEditor?.setValue?.(yamlText);
+        updateValidityElement();
+    }
+
+    function updateStateYamlValidity(invalid) {
+        const state = vscode.getState();
+
+        vscode.setState({
+            ...state,
+            yamlInvalid: invalid,
+        });
+
+        updateValidityElement();
     }
 
     function debounce(func, delay) {
@@ -69,6 +82,8 @@
                 "cp uec 1 - update editors invoked, editors not ready!"
             );
         }
+
+        updateValidityElement();
     }
 
     function pickColorTheme(colorThemeKind) {
@@ -189,6 +204,30 @@
         });
     }
 
+    function updateValidityElement() {
+        const state = vscode.getState();
+
+        const yamlInvalid = state.yamlInvalid === true;
+
+        const validityElement = document.getElementById(
+            "yaml-validity-element"
+        );
+        if (validityElement) {
+            validityElement.innerText = yamlInvalid
+                ? "Invalid (check json)"
+                : "Valid";
+        }
+
+        const yamlColumn = document.getElementById("yaml-column");
+        if (yamlColumn) {
+            if (yamlInvalid) {
+                yamlColumn.classList.add("langauge__column--invalid");
+            } else {
+                yamlColumn.classList.remove("langauge__column--invalid");
+            }
+        }
+    }
+
     function reflowEditors() {
         jsonMonacoEditor?.layout();
         yamlMonacoEditor?.layout();
@@ -223,6 +262,10 @@
 
                 case "response__convert-json-to-yaml":
                     processYamlFromEditorHost(message);
+                    return;
+
+                case "mark-yaml-invalid":
+                    updateStateYamlValidity(true);
                     return;
             }
         });

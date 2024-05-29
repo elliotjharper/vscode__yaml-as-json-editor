@@ -28,6 +28,10 @@
     align-items: center;
 }
 
+.langauge__column--invalid {
+    filter: brightness(0.5) grayscale(1);
+}
+
 .language__header,
 .language__footer {
     font-size: large;

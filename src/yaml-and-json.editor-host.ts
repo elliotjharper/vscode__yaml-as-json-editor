@@ -193,15 +193,21 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         document: vscode.TextDocument,
         writeOut: boolean
     ): void {
-        const yamlText = this.convertJsonToYaml(jsonText);
+        try {
+            const yamlText = this.convertJsonToYaml(jsonText);
 
-        webviewPanel.webview.postMessage({
-            type: 'response__convert-json-to-yaml',
-            yamlText,
-        });
+            webviewPanel.webview.postMessage({
+                type: 'response__convert-json-to-yaml',
+                yamlText,
+            });
 
-        if (writeOut) {
-            this.updateTextDocument(document, yamlText);
+            if (writeOut) {
+                this.updateTextDocument(document, yamlText);
+            }
+        } catch (err) {
+            webviewPanel.webview.postMessage({
+                type: 'mark-yaml-invalid',
+            });
         }
     }
 
