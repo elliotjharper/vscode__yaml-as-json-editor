@@ -4,7 +4,8 @@ export function buildWebviewHtml(
     styleUri: vscode.Uri,
     nonce: string,
     monacoVsFolderUri: vscode.Uri,
-    scriptUri: vscode.Uri
+    scriptUri: vscode.Uri,
+    colorThemeKind: vscode.ColorThemeKind
 ): string {
     return `
 	<!DOCTYPE html>
@@ -43,7 +44,7 @@ export function buildWebviewHtml(
 		<script nonce="${nonce}">
 			require.config({ paths: { vs: '${monacoVsFolderUri}' } });
 			require(['vs/editor/editor.main'], function () {
-				window.yamlAndJsonOnMonacoLoaded();
+				window.yamlAndJsonOnMonacoLoaded(${colorThemeKind});
 			});
 			console.log('[webview inline script][cp1] Monaco library load/require() started');
 		</script>

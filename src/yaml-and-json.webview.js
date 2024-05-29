@@ -71,10 +71,33 @@
         }
     }
 
-    function onMonacoLoaded() {
+    function pickColorTheme(colorThemeKind) {
+        switch (colorThemeKind) {
+            // light
+            case 1:
+                return "vs";
+
+            // dark
+            case 2:
+                return "vs-dark";
+
+            // high contrast dark
+            case 3:
+                return "hc-black";
+
+            // high contrast light
+            case 4:
+                return "hc-light";
+        }
+        return "vs";
+    }
+
+    function onMonacoLoaded(hostColorThemeKind) {
         console.log(
             "page cp2 - Monaco library loaded, creating editor instances"
         );
+
+        const theme = pickColorTheme(hostColorThemeKind);
 
         // JSON EDITOR
         //============
@@ -83,6 +106,7 @@
         var jsonEditorOptions = {
             value: "",
             language: "json",
+            theme,
         };
         jsonMonacoEditor = monaco.editor.create(
             jsonEditorElement,
@@ -115,6 +139,7 @@
         var yamlEditorOptions = {
             value: "",
             language: "yaml",
+            theme,
             readOnly: true,
         };
         yamlMonacoEditor = monaco.editor.create(

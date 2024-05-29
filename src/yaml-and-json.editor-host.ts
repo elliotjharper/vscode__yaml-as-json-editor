@@ -144,7 +144,13 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         // Use a nonce to whitelist which scripts can be run
         const nonce = getNonce();
 
-        return buildWebviewHtml(styleUri, nonce, monacoVsFolderUri, scriptUri);
+        return buildWebviewHtml(
+            styleUri,
+            nonce,
+            monacoVsFolderUri,
+            scriptUri,
+            vscode.window.activeColorTheme.kind
+        );
     }
 
     private convertYamlToJson(yamlText: string): string {
