@@ -9,7 +9,6 @@
 .languages__row {
     display: flex;
     flex-direction: row;
-    gap: 16px;
     
     height: 100vh;
     /* stand-in value to be used whilst the debug row is shown */
@@ -20,16 +19,28 @@
     background-color: #333;
     border: 1px solid #fff;
     color: white;
-    flex-grow: 1;
-    max-width: 50%;
+    overflow-x: hidden;
 
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+.language__column--width-sized {
+    flex: 0 0 50%;
+}
+
+.language__column--width-rest {
+    flex-grow: 1;
+}
+
 .langauge__column--invalid {
     filter: brightness(0.5) grayscale(1);
+}
+
+.language__divider {
+    width: 6px;
+    cursor: col-resize;
 }
 
 .language__header,

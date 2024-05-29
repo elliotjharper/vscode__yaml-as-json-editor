@@ -20,21 +20,17 @@ export function buildWebviewHtml(
 		<title>Yaml And Json</title>
 	</head>
 	<body>
-		<!--<div class="debug-row">
-			<button id="test-btn-1">Roundtrip Convert</button>
-		</div>-->
-	
 		<div class="languages__row">
-			<div class="language__column">
+			<div class="language__column language__column--width-sized" id="json-column">
 				<div class="language__header">JSON</div>
 				<div class="language__editor" id="json__editor"></div>
 			</div>
 
-			<div class="language__column" id="yaml-column">
+			<div class="language__divider" id="column-divider"></div>
+
+			<div class="language__column language__column--width-rest" id="yaml-column">
 				<div class="language__header">
 					<span>YAML</span>
-					<!--<label><input type="radio" name="yaml-view" value="current">Current</label>
-					<label><input type="radio" name="yaml-view" value="original">Original</label>-->
 					<span id="yaml-validity-element"></span>
 				</div>
 				<div class="language__editor" id="yaml__editor"></div>

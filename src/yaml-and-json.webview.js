@@ -8,6 +8,30 @@
     let yamlMonacoEditor;
     let editorsHaveInitialContent = false;
 
+    function getJsonEditorElement() {
+        return document.getElementById("json__editor");
+    }
+
+    function getYamlEditorElement() {
+        return document.getElementById("yaml__editor");
+    }
+
+    function getYamlValidityElement() {
+        return document.getElementById("yaml-validity-element");
+    }
+
+    function getJsonColumnElement() {
+        return document.getElementById("json-column");
+    }
+
+    function getColumnDividerElement() {
+        return document.getElementById("column-divider");
+    }
+
+    function getYamlColumnElement() {
+        return document.getElementById("yaml-column");
+    }
+
     function persistExtensionsState(jsonText, yamlText) {
         vscode.setState({
             jsonText,
@@ -116,7 +140,7 @@
 
         // JSON EDITOR
         //============
-        var jsonEditorElement = document.getElementById("json__editor");
+        var jsonEditorElement = getJsonEditorElement();
         // IStandaloneEditorConstructionOptions
         var jsonEditorOptions = {
             value: "",
@@ -149,7 +173,7 @@
 
         // YAML EDITOR
         //============
-        var yamlEditorElement = document.getElementById("yaml__editor");
+        var yamlEditorElement = getYamlEditorElement();
         // IStandaloneEditorConstructionOptions
         var yamlEditorOptions = {
             value: "",
@@ -209,16 +233,14 @@
 
         const yamlInvalid = state.yamlInvalid === true;
 
-        const validityElement = document.getElementById(
-            "yaml-validity-element"
-        );
+        const validityElement = getYamlValidityElement();
         if (validityElement) {
             validityElement.innerText = yamlInvalid
                 ? "Invalid (check json)"
                 : "Valid";
         }
 
-        const yamlColumn = document.getElementById("yaml-column");
+        const yamlColumn = getYamlColumnElement();
         if (yamlColumn) {
             if (yamlInvalid) {
                 yamlColumn.classList.add("langauge__column--invalid");
@@ -233,11 +255,49 @@
         yamlMonacoEditor?.layout();
     }
 
-    function setupResizeListener() {
+    function setupHostResizeListener() {
         const debouncedReflowEditors = debounce(reflowEditors, 200);
         window.onresize = () => {
             debouncedReflowEditors();
         };
+    }
+
+    function setupColumnResizeListener() {
+        const jsonColumn = getJsonColumnElement();
+        const columnDivider = getColumnDividerElement();
+
+        if (!jsonColumn || !columnDivider) {
+            throw new Error("Missing an element.");
+        }
+
+        const debouncedReflowEditors = debounce(reflowEditors, 100);
+
+        // this should be the width of the divider column divided by 2
+        const dividerColumnAdjustment = 6 / 2;
+
+        function columnResize(mouseMoveEvent) {
+            if (!jsonColumn || !columnDivider?.parentElement) {
+                return;
+            }
+            const containerRect =
+                columnDivider.parentElement.getBoundingClientRect();
+            jsonColumn.style.flex = `0 0 ${
+                mouseMoveEvent.clientX -
+                containerRect.left -
+                dividerColumnAdjustment
+            }px`;
+            debouncedReflowEditors();
+        }
+
+        function stopColumnResize() {
+            document.removeEventListener("mousemove", columnResize);
+            document.removeEventListener("mouseup", stopColumnResize);
+        }
+
+        columnDivider.addEventListener("mousedown", function (mouseMoveEvent) {
+            document.addEventListener("mousemove", columnResize);
+            document.addEventListener("mouseup", stopColumnResize);
+        });
     }
 
     function setupMessageListener() {
@@ -276,21 +336,7 @@
     }
 
     setupMessageListener();
-    setupResizeListener();
+    setupHostResizeListener();
+    setupColumnResizeListener();
     setupOnMonacoLoaded();
-
-    function setupTestButton() {
-        const testButtonElement = document.getElementById("test-btn-1");
-        testButtonElement?.addEventListener("click", () => {
-            console.log("testButtonClicked");
-
-            const state = vscode.getState();
-
-            vscode.postMessage({
-                type: "convert-yaml-to-json",
-                yamlText: state.yamlText,
-            });
-        });
-    }
-    //setupTestButton();
 })();
