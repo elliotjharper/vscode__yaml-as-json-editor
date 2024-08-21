@@ -2,9 +2,10 @@
     "name": "elltg-yaml-as-json-editor",
     "displayName": "YAML as JSON Editor",
     "description": "Lets you open YAML files like they are JSON and edit it as JSON. Then save out as YAML.",
+    "icon": "src/yaml-to-json.png",
     "publisher": "elltg",
     "author": "elltg",
-    "version": "1.0.8",
+    "version": "1.0.10",
     "repository": {
         "type": "git",
         "url": "https://github.com/elliotjharper/vscode__yaml-as-json-editor"
@@ -44,6 +45,9 @@
                 "selector": [
                     {
                         "filenamePattern": "*.yaml"
+                    },
+                    {
+                        "filenamePattern": "*.yml"
                     }
                 ]
             }
