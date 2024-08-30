@@ -14,7 +14,6 @@ So if you try to open a YAML file that cannot be converted to JSON then this can
 ## TODO list
 
 -   Retain comments! (create grammar to read the yaml and comments and template with something like ejs to transform out to json with comments)
--   Allow choosing of yaml preferences (single/double quotes etc..)
 -   Error feedback when you open a YAML file that could not be translated to JSON.
 
 ## DONE list
@@ -22,6 +21,7 @@ So if you try to open a YAML file that cannot be converted to JSON then this can
 -   Theme the inner editors with a similar color kind to the hosting vscode instances current theme.
 -   Error feedback when you currently have JSON that cannot be parsed and therefore is not currently going to be used.
 -   Column resizing.
+-   Allow choosing of yaml preferences (single/double quotes etc..)
 
 ## Debugging the edtior
 

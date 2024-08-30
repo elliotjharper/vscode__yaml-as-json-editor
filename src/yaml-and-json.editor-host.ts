@@ -2,6 +2,18 @@ import * as vscode from 'vscode';
 import { getNonce } from './get-nonce';
 import { buildWebviewHtml } from './yaml-and-json.webview.html';
 import * as yaml from 'yaml';
+import {
+    defaultPropertyStlye,
+    defaultQuoteStlye,
+    PropertyStyle,
+    propertyStyleKey,
+    QuoteStyle,
+    quoteStyleKey,
+} from './preferences';
+import {
+    EditorToHostMessage,
+    messageToEditor,
+} from './extension-message-types';
 
 /**
  * Plan for a yaml editor
@@ -35,7 +47,12 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
 
     private static readonly viewType = 'eh.yamlAndJson';
 
-    constructor(private readonly context: vscode.ExtensionContext) {}
+    private quoteStyle: QuoteStyle | undefined;
+    private propertyStyle: PropertyStyle | undefined;
+
+    constructor(private readonly context: vscode.ExtensionContext) {
+        this.loadYamlPreferences();
+    }
 
     /**
      * Called when our custom editor is opened.
@@ -83,7 +100,7 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         webviewPanel.webview.onDidReceiveMessage((message) => {
             console.log(`[editorHost] messageReceived, type = ${message.type}`);
 
-            switch (message.type) {
+            switch (message.type as EditorToHostMessage) {
                 case 'convert-yaml-to-json':
                     this.handleRequestToConvertYamlToJson(
                         message.yamlText,
@@ -99,14 +116,23 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
                         message.writeOut
                     );
                     return;
+
+                case 'submit-new-user-preferences':
+                    this.handleNewUserPreferences(
+                        message.quoteStyle,
+                        message.propertyStyle
+                    );
+                    return;
             }
         });
 
         const initialYamlText = textDocument.getText();
         webviewPanel.webview.postMessage({
-            type: 'init',
+            type: messageToEditor('init'),
             jsonText: this.convertYamlToJson(initialYamlText),
             yamlText: initialYamlText,
+            quoteStyle: this.quoteStyle,
+            propertyStyle: this.propertyStyle,
         });
     }
 
@@ -169,8 +195,8 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         // inform the webview so that it reflects that the editor state is not currently valid
         const parsedJson = JSON.parse(jsonText);
         const yamlString = yaml.stringify(parsedJson, {
-            defaultKeyType: 'PLAIN',
-            defaultStringType: 'QUOTE_DOUBLE',
+            defaultKeyType: this.propertyStyle,
+            defaultStringType: this.quoteStyle,
         });
         return yamlString;
     }
@@ -182,7 +208,7 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         const jsonText = this.convertYamlToJson(yamlText);
 
         webviewPanel.webview.postMessage({
-            type: 'response__convert-yaml-to-json',
+            type: messageToEditor('response__convert-yaml-to-json'),
             jsonText,
         });
     }
@@ -197,7 +223,7 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
             const yamlText = this.convertJsonToYaml(jsonText);
 
             webviewPanel.webview.postMessage({
-                type: 'response__convert-json-to-yaml',
+                type: messageToEditor('response__convert-json-to-yaml'),
                 yamlText,
             });
 
@@ -206,7 +232,7 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
             }
         } catch (err) {
             webviewPanel.webview.postMessage({
-                type: 'mark-yaml-invalid',
+                type: messageToEditor('mark-yaml-invalid'),
             });
         }
     }
@@ -229,5 +255,30 @@ export class YamlAndJsonEditorHost implements vscode.CustomTextEditorProvider {
         );
 
         return vscode.workspace.applyEdit(edit, { isRefactoring: true });
+    }
+
+    private handleNewUserPreferences(
+        quoteStyle: QuoteStyle,
+        propertyStyle: PropertyStyle
+    ): void {
+        this.quoteStyle = quoteStyle;
+        this.propertyStyle = propertyStyle;
+        this.saveYamlPreferences();
+    }
+
+    private loadYamlPreferences(): void {
+        this.quoteStyle =
+            (this.context.globalState.get(quoteStyleKey) as QuoteStyle) ??
+            defaultQuoteStlye;
+
+        this.propertyStyle =
+            (this.context.globalState.get(propertyStyleKey) as PropertyStyle) ??
+            defaultPropertyStlye;
+    }
+
+    private saveYamlPreferences(): void {
+        this.context.globalState.update(quoteStyleKey, this.quoteStyle);
+
+        this.context.globalState.update(propertyStyleKey, this.propertyStyle);
     }
 }

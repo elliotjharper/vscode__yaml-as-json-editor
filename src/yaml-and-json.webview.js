@@ -32,11 +32,12 @@
         return document.getElementById("yaml-column");
     }
 
-    function persistExtensionsState(jsonText, yamlText) {
-        vscode.setState({
-            jsonText,
-            yamlText,
-        });
+    function getQuoteStyleElement() {
+        return document.getElementById("quote-preference");
+    }
+
+    function getPropertyStyleElement() {
+        return document.getElementById("property-style-preference");
     }
 
     function updateStateJson(jsonText, updateEditor = true) {
@@ -76,6 +77,16 @@
         updateValidityElement();
     }
 
+    function updateStatePreferences(quoteStyle, propertyStyle) {
+        const state = vscode.getState();
+
+        vscode.setState({
+            ...state,
+            quoteStyle,
+            propertyStyle,
+        });
+    }
+
     function debounce(func, delay) {
         let timeoutId;
         return function () {
@@ -86,6 +97,30 @@
                 func.apply(this, arguments);
             }, delay);
         };
+    }
+
+    function updatePreferencesFromState() {
+        const state = vscode.getState();
+
+        if (!state?.quoteStyle || !state?.propertyStyle) {
+            console.log(
+                "updatePrferencesFromState invoked but values not found in state"
+            );
+            return;
+        }
+
+        const quoteStyleElement = getQuoteStyleElement();
+        const propertyStyleElement = getPropertyStyleElement();
+
+        if (!quoteStyleElement || !propertyStyleElement) {
+            console.log(
+                "updatePreferencesFromState invoked but did not find all required elements"
+            );
+            return;
+        }
+
+        quoteStyleElement.value = state.quoteStyle;
+        propertyStyleElement.value = state.propertyStyle;
     }
 
     function updateEditorsFromState() {
@@ -186,6 +221,7 @@
             yamlEditorOptions
         );
 
+        updatePreferencesFromState();
         updateEditorsFromState();
     }
 
@@ -193,7 +229,14 @@
      * Invoked when an instance of the editor is created 'init' is used to send the data in
      */
     function processInitFromEditorHost(message) {
-        persistExtensionsState(message.jsonText, message.yamlText);
+        vscode.setState({
+            jsonText: message.jsonText,
+            yamlText: message.yamlText,
+            quoteStyle: message.quoteStyle,
+            propertyStyle: message.propertyStyle,
+        });
+
+        updatePreferencesFromState();
         updateEditorsFromState();
     }
 
@@ -206,6 +249,7 @@
             // This is how we are ignoring TextDocument edits that we started after user input
             return;
         }
+        updatePreferencesFromState();
         updateEditorsFromState();
     }
 
@@ -300,6 +344,45 @@
         });
     }
 
+    function submitNewUserPreferences() {
+        const quoteStyle = getQuoteStyleElement()?.value;
+        const propertyStyle = getPropertyStyleElement()?.value;
+
+        if (!quoteStyle || !propertyStyle) {
+            console.log(
+                "submitNewUserPreferences invoked but not all values were found"
+            );
+        }
+
+        updateStatePreferences(quoteStyle, propertyStyle);
+
+        vscode.postMessage({
+            type: "submit-new-user-preferences",
+            quoteStyle,
+            propertyStyle,
+        });
+
+        processJsonFromUser();
+    }
+
+    function setupPreferencesListener() {
+        // euihlwauihlwaeuhihuiwaheulihuiawef
+        const quoteStyleElement = getQuoteStyleElement();
+        const propertyStyleElement = getPropertyStyleElement();
+
+        if (!quoteStyleElement || !propertyStyleElement) {
+            console.log(
+                "setupPreferencesListener invoked but not all elements were found"
+            );
+        }
+
+        for (const elem of [quoteStyleElement, propertyStyleElement]) {
+            elem?.addEventListener("input", () => {
+                submitNewUserPreferences();
+            });
+        }
+    }
+
     function setupMessageListener() {
         // Handle messages sent from the extension to the webview
         window.addEventListener("message", (event) => {
@@ -338,5 +421,6 @@
     setupMessageListener();
     setupHostResizeListener();
     setupColumnResizeListener();
+    setupPreferencesListener();
     setupOnMonacoLoaded();
 })();

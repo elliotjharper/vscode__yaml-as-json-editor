@@ -6,11 +6,26 @@
     height: 30px;
 }
 
+.page-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.config-pane {
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
 .languages__row {
     display: flex;
     flex-direction: row;
     
-    height: 100vh;
+    height: 100%;
     /* stand-in value to be used whilst the debug row is shown */
     /*height: calc(100vh - 30px);*/
 }
