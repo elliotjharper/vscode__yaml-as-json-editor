@@ -366,7 +366,6 @@
     }
 
     function setupPreferencesListener() {
-        // euihlwauihlwaeuhihuiwaheulihuiawef
         const quoteStyleElement = getQuoteStyleElement();
         const propertyStyleElement = getPropertyStyleElement();
 
